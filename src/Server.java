@@ -1,13 +1,21 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Server extends Thread{
 
-    private int serverPort;
-
-    public Server(int serverPort) {
+    private final int serverPort;
+    private ArrayList<serverWorker> workersList= new ArrayList<serverWorker>();
+    private Users users;
+    public List<serverWorker> getWorkersList(){
+        return this.workersList;
+    }
+    
+    public Server(int serverPort, Users users) {
         this.serverPort=serverPort;
+        this.users=users;
     }
     @Override
     public void run() {
@@ -17,7 +25,8 @@ public class Server extends Thread{
                 System.out.println("connecting.....");
                 Socket Csocket= serverSocket.accept();
                 System.out.println("connected client : "+ Csocket);
-                serverWorker sWorker= new serverWorker(Csocket);
+                serverWorker sWorker= new serverWorker(this,Csocket,users);
+                workersList.add(sWorker);
                 sWorker.start();
                 
                 
@@ -26,5 +35,9 @@ public class Server extends Thread{
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+    public void remove(serverWorker serverWorker) {
+        workersList.remove(serverWorker);
     }
 }
