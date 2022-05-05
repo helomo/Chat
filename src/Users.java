@@ -15,5 +15,14 @@ public class Users{
         }
         return tmp;
     }
+    public User getUser(String username){
+        for(User user:users){
+            if(user.getUsername().equalsIgnoreCase(username)){
+                return user;
+            }
+        }
+        return null;
+
+    }
 
 }

@@ -11,6 +11,9 @@ public class User {
     public String getUsername() {
         return this.username;
     }
+    public String getUserId(){
+        return this.id;
+    }
     public Boolean check(String username, String password){
         return username.equals(this.username) && password.equals(this.password);
     }

@@ -4,10 +4,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Handler;
+
 
 public class serverWorker extends Thread {
 
@@ -18,13 +17,16 @@ public class serverWorker extends Thread {
     private Server server;
     private OutputStream outputStream;
     private Users users;
+    private Groups groups;
+    private User user;
    
     
 
-    public serverWorker(Server server, Socket clientSocket, Users users2){
+    public serverWorker(Server server, Socket clientSocket, Users users, Groups groups){
         this.server=server;
         this.clientSocket=clientSocket;
-        this.users=users2;
+        this.users=users;
+        this.groups=groups;
     }
     public Boolean isLogedIn(){
         return this.logedIn;
@@ -49,20 +51,43 @@ public class serverWorker extends Thread {
             String [] token= line.split(" ");
             if (token!=null && token.length>0){
                 String cmd= token[0];
-                if("quit".equalsIgnoreCase(cmd) || "logout".equalsIgnoreCase(cmd)){
-                    handelLogOut(outputStream);
+                if("quit".equalsIgnoreCase(cmd) ){
+                    if(this.isLogedIn())
+                        handelLogOut(outputStream);
                     break;
                 }
+                else if ( "logout".equalsIgnoreCase(cmd)){
+                    if(this.isLogedIn())
+                        handelLogOut(outputStream);
+                    else 
+                        send2("you need to login first!!");
+                    }
+                
                 else if ("login".equalsIgnoreCase(cmd)){
-                    handelLogIn(outputStream,token);
+                    if(this.isLogedIn())
+                        this.send2("you have loged in already!!\n");
+                    else
+                        handelLogIn(outputStream,token);
 
                 }
                 else if("msg".equalsIgnoreCase(cmd)){
-                    handelMsg(token);
+                    if(this.isLogedIn())
+                        handelMsg(token);
+                    else
+                        this.send2("login first!!\n");    
 
                 }
                 else if ("join".equalsIgnoreCase(cmd)){
-                    handlJoin(token);
+                    if(this.isLogedIn())
+                        handlJoin(token);
+                    else
+                        this.send2("login first!!\n");   
+                }
+                else if ("GroupMsg".equalsIgnoreCase(cmd)){
+                    if(this.isLogedIn())
+                        handleGroupMsg(token);
+                    else
+                        this.send2("login first!!\n");   
                 }
                 else{ 
                     String msg="not recognizable command "+cmd +"\n";
@@ -74,9 +99,50 @@ public class serverWorker extends Thread {
         clientSocket.close();
     }
 
-    private void handlJoin(String[] token) {
-        if (token.length==2){
+    private void handleGroupMsg(String [] token) throws IOException {
+        Group tmpgGroup=groups.getGroup(token[1]);
+        if(tmpgGroup!=null){
+            if(tmpgGroup.isMember(this.getLogin())){
+                String msgBody= msg(token);
+                List<serverWorker> workersList =server.getWorkersList();
             
+                for (serverWorker worker:workersList){
+                    if(tmpgGroup.isMember(worker.getLogin())){
+                        String outMsg="Group:"+tmpgGroup.getGroupName()+" "+this.login+" :"+msgBody+"\n";
+                        worker.send(outMsg);
+                    }
+                }
+            }
+            else{
+                this.send("you are not a member of this group!!\n");
+            }
+        }
+        else 
+            this.send("there is no such group with this name\n");
+        
+    }
+    private void handlJoin(String[] token) throws IOException {
+        if (token.length==2){
+            String groupName=token[1];
+            Group tmpGroup;
+            if(groups.checkGroups(groupName)){
+                tmpGroup=groups.getGroup(groupName);
+                if( !tmpGroup.isMember(this.login)){
+                    tmpGroup.add(this.user);
+                    this.send("You joind "+groupName);
+                }
+                else{
+                    this.send("you already are a member of "+groupName);
+                }
+            }
+            else{
+                tmpGroup= new Group(groupName, "g"+(groups.getGroups().size()+1));
+                groups.add(tmpGroup);
+                this.send(groupName+" has been created in "+ new Date()+"\n");
+                tmpGroup.add(this.user);
+                this.send("You joind "+groupName);
+
+            }
         }
     }
     //"msg" "login(username)" "the message"
@@ -87,7 +153,7 @@ public class serverWorker extends Thread {
         List<serverWorker> workersList =server.getWorkersList();
         for (serverWorker worker:workersList){
             if(recever.equalsIgnoreCase(worker.getLogin())){
-                String outMsg="Msg "+this.login+" :"+msgBody+"\n";
+                String outMsg=this.login+" :"+msgBody+"\n";
                 worker.send(outMsg);
             }
         }
@@ -104,6 +170,7 @@ public class serverWorker extends Thread {
         }
         return tmp;
     }
+    
     public String getLogin(){
         return this.login;
     }
@@ -133,6 +200,7 @@ public class serverWorker extends Thread {
         if (token.length==3){
             this.login=token[1];
             this.password=token[2];
+            this.user=users.getUser(this.login);
             if(users.checkUser(this.login, this.password)){
                 this.logedIn=true;
                 String msg="Loged in successfuly";
@@ -169,4 +237,8 @@ public class serverWorker extends Thread {
            outputStream.write(msg.getBytes());
        }
     }
+    private void send2(String msg) throws IOException {
+
+            this.outputStream.write(msg.getBytes());
+     }
 }

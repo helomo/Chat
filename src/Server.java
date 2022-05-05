@@ -9,13 +9,15 @@ public class Server extends Thread{
     private final int serverPort;
     private ArrayList<serverWorker> workersList= new ArrayList<serverWorker>();
     private Users users;
+    private Groups groups;
     public List<serverWorker> getWorkersList(){
         return this.workersList;
     }
     
-    public Server(int serverPort, Users users) {
+    public Server(int serverPort, Users users, Groups groups) {
         this.serverPort=serverPort;
         this.users=users;
+        this.groups=groups;
     }
     @Override
     public void run() {
@@ -25,7 +27,7 @@ public class Server extends Thread{
                 System.out.println("connecting.....");
                 Socket Csocket= serverSocket.accept();
                 System.out.println("connected client : "+ Csocket);
-                serverWorker sWorker= new serverWorker(this,Csocket,users);
+                serverWorker sWorker= new serverWorker(this,Csocket,users,groups);
                 workersList.add(sWorker);
                 sWorker.start();
                 
