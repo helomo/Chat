@@ -83,6 +83,12 @@ public class serverWorker extends Thread {
                     else
                         this.send2("login first!!\n");   
                 }
+                else if ("leave".equalsIgnoreCase(cmd)){
+                    if(this.isLogedIn())
+                        handlLeave(token);
+                    else
+                        this.send2("login first!!\n");   
+                }
                 else if ("GroupMsg".equalsIgnoreCase(cmd)){
                     if(this.isLogedIn())
                         handleGroupMsg(token);
@@ -99,6 +105,26 @@ public class serverWorker extends Thread {
         clientSocket.close();
     }
 
+    private void handlLeave(String[] token) throws IOException {
+        if (token.length==2){
+            String groupName=token[1];
+            Group tmpGroup;
+            if(groups.checkGroups(groupName)){
+                tmpGroup=groups.getGroup(groupName);
+                if( tmpGroup.isMember(this.login)){
+                    tmpGroup.remove(user);
+                    this.send("You left "+groupName);
+                }
+                else{
+                    this.send("you are not a member of "+groupName);
+                }
+            }
+            else{
+                this.send(groupName+" does not exist!! \n");
+
+            }
+        }
+    }
     private void handleGroupMsg(String [] token) throws IOException {
         Group tmpgGroup=groups.getGroup(token[1]);
         if(tmpgGroup!=null){

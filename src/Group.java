@@ -3,7 +3,7 @@ import java.util.ArrayList;
 public class Group {
     private String groupName;
     private String groupId;
-    private ArrayList<User> gorupUsers=new ArrayList<User>();
+    private ArrayList<User> groupUsers=new ArrayList<User>();
     public Group(String groupName,String groupId){
         this.groupName=groupName;
         this.groupId=groupId;
@@ -11,11 +11,15 @@ public class Group {
     public Group(String groupName,String groupId,ArrayList<User> groupUsers){
         this.groupName=groupName;
         this.groupId=groupId;
-        this.gorupUsers=groupUsers;
+        this.groupUsers=groupUsers;
     }
 
     public void add(User user){
-        gorupUsers.add(user);
+        groupUsers.add(user);
+    }
+    public void remove(User user){
+        groupUsers.remove(user);
+
     }
     public String getGroupName(){
         return this.groupName;
@@ -24,11 +28,11 @@ public class Group {
         return this.groupId;
     }
     public ArrayList<User> getGroupUsers(){
-        return this.gorupUsers;
+        return this.groupUsers;
     }
     public boolean isMember(String username){
         boolean tmp =false;
-        for (User user:gorupUsers){
+        for (User user:groupUsers){
             tmp= tmp || username.equalsIgnoreCase(user.getUsername());
         }
         return tmp;
