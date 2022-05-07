@@ -12,3 +12,5 @@ leave GroupName
 
 GroupMsg GroupName "theMsg"
 
+reg userName password
+

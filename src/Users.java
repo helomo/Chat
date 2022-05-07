@@ -5,6 +5,9 @@ public class Users{
     public Users(){
 
     }
+    public int getLength(){
+        return users.size();
+    }
     public void add (User user){
         users.add(user);
     }
@@ -15,6 +18,8 @@ public class Users{
         }
         return tmp;
     }
+
+    
     public User getUser(String username){
         for(User user:users){
             if(user.getUsername().equalsIgnoreCase(username)){

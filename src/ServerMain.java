@@ -5,7 +5,7 @@ public class ServerMain {
         Users users=new Users();
         users.add(new User("admin", "admin","u1"));
         users.add(new User("jim", "jim","u2"));
-        users.add(new User("dio", "69","u3"));
+        users.add(new User("dio", "jotaro","u3"));
         users.add(new User("eren","tatakae","u3" ));
         
         Groups groups = new Groups();

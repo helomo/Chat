@@ -94,6 +94,12 @@ public class serverWorker extends Thread {
                     else
                         this.send2("login first!!\n");   
                 }
+                else if ("reg".equalsIgnoreCase(cmd)){
+                    if(!this.isLogedIn())
+                        handelReg(token);
+                    else
+                        this.send("you already hava an acount!!\n");
+                }
                 else{ 
                     String msg="not recognizable command "+cmd +"\n";
                     outputStream.write(msg.getBytes());
@@ -104,6 +110,25 @@ public class serverWorker extends Thread {
         clientSocket.close();
     }
 
+    private void handelReg(String[] token) throws IOException {
+        String userName;
+        String password;
+        User newUser;
+        if(token.length==3){
+            userName=token[1];
+            password=token[2];
+            user=users.getUser(userName);
+            if(user ==null){
+                users.add(new User(userName, password, "U"+(users.getLength()+1)));
+                send2(userName+" is registard succusfully!!\n");
+            }
+            else 
+                send2("This userName is already used try another one!\n");
+        }
+        else
+            send2("wrong format!!\n");
+
+    }
     private void handlLeave(String[] token) throws IOException {
         if (token.length==2){
             String groupName=token[1];
