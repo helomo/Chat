@@ -1,0 +1,14 @@
+login userName password
+
+logout
+
+quit
+
+msg ReciverUserName "theMsg"
+
+join GroupName
+
+leave GroupName
+
+GroupMsg GroupName "theMsg"
+
