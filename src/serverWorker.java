@@ -113,11 +113,12 @@ public class serverWorker extends Thread {
     private void handelReg(String[] token) throws IOException {
         String userName;
         String password;
+        User newUser;
         if(token.length==3){
             userName=token[1];
             password=token[2];
-            user=users.getUser(userName);
-            if(user ==null){
+            newUser=users.getUser(userName);
+            if(newUser ==null){
                 users.add(new User(userName, password, "U"+(users.getLength()+1)));
                 send2(userName+" is registard succusfully!!\n");
             }
