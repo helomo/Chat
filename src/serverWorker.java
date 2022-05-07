@@ -113,7 +113,6 @@ public class serverWorker extends Thread {
     private void handelReg(String[] token) throws IOException {
         String userName;
         String password;
-        User newUser;
         if(token.length==3){
             userName=token[1];
             password=token[2];
