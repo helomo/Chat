@@ -36,7 +36,7 @@ public class serverWorker extends Thread {
         try {
             handleClientSocket();
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+           // e.printStackTrace();
         }
         
     }
@@ -46,7 +46,6 @@ public class serverWorker extends Thread {
          
         BufferedReader reader = new BufferedReader( new InputStreamReader(inputStream));
         String line;
-        
         while ((line=reader.readLine())!= null){
             String [] token= line.split(" ");
             if (token!=null && token.length>0){
@@ -60,7 +59,7 @@ public class serverWorker extends Thread {
                     if(this.isLogedIn())
                         handelLogOut(outputStream);
                     else 
-                        send2("you need to login first!!");
+                        send2("you need to login first!!\n");
                     }
                 
                 else if ("login".equalsIgnoreCase(cmd)){
@@ -113,10 +112,10 @@ public class serverWorker extends Thread {
                 tmpGroup=groups.getGroup(groupName);
                 if( tmpGroup.isMember(this.login)){
                     tmpGroup.remove(user);
-                    this.send("You left "+groupName);
+                    this.send("You left "+groupName+"\n");
                 }
                 else{
-                    this.send("you are not a member of "+groupName);
+                    this.send("you are not a member of "+groupName+"\n");
                 }
             }
             else{
@@ -155,10 +154,10 @@ public class serverWorker extends Thread {
                 tmpGroup=groups.getGroup(groupName);
                 if( !tmpGroup.isMember(this.login)){
                     tmpGroup.add(this.user);
-                    this.send("You joind "+groupName);
+                    this.send("You joind "+groupName+"\n");
                 }
                 else{
-                    this.send("you already are a member of "+groupName);
+                    this.send("you already are a member of "+groupName+"\n");
                 }
             }
             else{
@@ -166,7 +165,7 @@ public class serverWorker extends Thread {
                 groups.add(tmpGroup);
                 this.send(groupName+" has been created in "+ new Date()+"\n");
                 tmpGroup.add(this.user);
-                this.send("You joind "+groupName);
+                this.send("You joind "+groupName+"\n");
 
             }
         }
@@ -229,7 +228,7 @@ public class serverWorker extends Thread {
             this.user=users.getUser(this.login);
             if(users.checkUser(this.login, this.password)){
                 this.logedIn=true;
-                String msg="Loged in successfuly";
+                String msg="Loged in successfuly\n";
                 outputStream.write(msg.getBytes());
                 System.out.println(this.login+ " has loged in succesfuly!! "+ (new Date()).toString());
                 String onlineMsg= "Online "+ this.login+"\n";
