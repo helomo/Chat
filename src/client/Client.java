@@ -1,3 +1,4 @@
+package client;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +15,7 @@ public class Client {
        OutputStream out= socket.getOutputStream();
        BufferedReader bf= new BufferedReader(new InputStreamReader(in));
        Scanner scn = new Scanner(System.in);
+       boolean logedIn=false;
 
        Thread write= new Thread(){
            @Override
@@ -22,6 +24,8 @@ public class Client {
             try {
                 while(!msg.equals("quit")){
                     msg= scn.nextLine()+"\n";
+                    
+
                     out.write(msg.getBytes());
                 }
                 in.close();
@@ -89,5 +93,8 @@ void groupMsg(OutputStream outputStream,String groupName, String theMsg) throws 
     outputStream.write(("GroupMsg "+groupName+" "+theMsg+"\n").getBytes());
 
 }
+void menu(int input,boolean logedIn){
+}
+
 
 }

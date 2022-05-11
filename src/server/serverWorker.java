@@ -1,3 +1,4 @@
+package server;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,6 +7,9 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Date;
 import java.util.List;
+
+import module.*;
+
 
 
 public class serverWorker extends Thread {
@@ -55,6 +59,13 @@ public class serverWorker extends Thread {
                         handelLogOut(outputStream);
                     break;
                 }
+                else if ("getOnline".equalsIgnoreCase(cmd)){
+                    if(this.isLogedIn())
+                        handelgetOnline();
+                    else 
+                        send2("you need to login first!!\n");
+                    }
+                
                 else if ( "logout".equalsIgnoreCase(cmd)){
                     if(this.isLogedIn())
                         handelLogOut(outputStream);
@@ -98,7 +109,7 @@ public class serverWorker extends Thread {
                     if(!this.isLogedIn())
                         handelReg(token);
                     else
-                        this.send("you already hava an acount!!\n");
+                        this.send2("you already hava an acount!!\n");
                 }
                 else{ 
                     String msg="not recognizable command "+cmd +"\n";
@@ -110,6 +121,20 @@ public class serverWorker extends Thread {
         clientSocket.close();
     }
 
+    private void handelgetOnline() throws IOException {
+        List<serverWorker> workersList =server.getWorkersList();
+        String msg;
+        for (serverWorker worker:workersList){
+            if(!this.getLogin().equalsIgnoreCase(worker.getLogin())){
+                if (worker.isLogedIn()){
+                    msg="Online "+ worker.getLogin()+"\n";
+                    this.send2(msg);
+                }
+            }
+
+        }
+        
+    }
     private void handelReg(String[] token) throws IOException {
         String userName;
         String password;
@@ -137,14 +162,14 @@ public class serverWorker extends Thread {
                 tmpGroup=groups.getGroup(groupName);
                 if( tmpGroup.isMember(this.login)){
                     tmpGroup.remove(user);
-                    this.send("You left "+groupName+"\n");
+                    this.send2("You left "+groupName+"\n");
                 }
                 else{
-                    this.send("you are not a member of "+groupName+"\n");
+                    this.send2("you are not a member of "+groupName+"\n");
                 }
             }
             else{
-                this.send(groupName+" does not exist!! \n");
+                this.send2(groupName+" does not exist!! \n");
 
             }
         }
@@ -164,11 +189,11 @@ public class serverWorker extends Thread {
                 }
             }
             else{
-                this.send("you are not a member of this group!!\n");
+                this.send2("you are not a member of this group!!\n");
             }
         }
         else 
-            this.send("there is no such group with this name\n");
+            this.send2("there is no such group with this name\n");
         
     }
     private void handlJoin(String[] token) throws IOException {
@@ -179,18 +204,18 @@ public class serverWorker extends Thread {
                 tmpGroup=groups.getGroup(groupName);
                 if( !tmpGroup.isMember(this.login)){
                     tmpGroup.add(this.user);
-                    this.send("You joind "+groupName+"\n");
+                    this.send2("You joind "+groupName+"\n");
                 }
                 else{
-                    this.send("you already are a member of "+groupName+"\n");
+                    this.send2("you already are a member of "+groupName+"\n");
                 }
             }
             else{
                 tmpGroup= new Group(groupName, "g"+(groups.getGroups().size()+1));
                 groups.add(tmpGroup);
-                this.send(groupName+" has been created in "+ new Date()+"\n");
+                this.send2(groupName+" has been created in "+ new Date()+"\n");
                 tmpGroup.add(this.user);
-                this.send("You joind "+groupName+"\n");
+                this.send2("You joind "+groupName+"\n");
 
             }
         }
@@ -228,22 +253,22 @@ public class serverWorker extends Thread {
     private void handelLogOut(OutputStream outputStream) throws IOException {
         server.remove(this);
         if(this.logedIn){
-            String msg="loged out!!";
-            outputStream.write(msg.getBytes());
+            String msg="loged out!!\n";
+            send2(msg);
             this.logedIn=false;
             System.out.println(this.login+" has loged out in "+(new Date()).toString());
             List<serverWorker> workersList =server.getWorkersList();
             
             for (serverWorker worker:workersList){
                 if(!this.getLogin().equalsIgnoreCase(worker.getLogin())){
-                    worker.send(this.getLogin()+" has loged out!!");
+                    worker.send("Sys: offline "+this.getLogin()+"!\n");
                 }
             }
             this.login=null;
         }
         else{
             String msg="Can't use this command \n";
-            outputStream.write(msg.getBytes());
+            send2(msg);
         }
     }
     private void handelLogIn(OutputStream outputStream, String[] token) throws IOException{
@@ -254,7 +279,7 @@ public class serverWorker extends Thread {
             if(users.checkUser(this.login, this.password)){
                 this.logedIn=true;
                 String msg="Loged in successfuly\n";
-                outputStream.write(msg.getBytes());
+                send2(msg);
                 System.out.println(this.login+ " has loged in succesfuly!! "+ (new Date()).toString());
                 String onlineMsg= "Online "+ this.login+"\n";
                 List<serverWorker> workersList =server.getWorkersList();
@@ -262,14 +287,14 @@ public class serverWorker extends Thread {
                     if(!this.getLogin().equalsIgnoreCase(worker.getLogin())){
                         if (worker.isLogedIn()){
                             String msg2="Online "+ worker.getLogin()+"\n";
-                            this.send(msg2);
+                            this.send2(msg2);
                         }
                     }
 
                 }
                 for (serverWorker worker:workersList){
                     if(!this.getLogin().equalsIgnoreCase(worker.getLogin())){
-                        worker.send(onlineMsg);
+                        worker.send2(onlineMsg);
                     }
                 }
             
@@ -289,6 +314,6 @@ public class serverWorker extends Thread {
     }
     private void send2(String msg) throws IOException {
 
-            this.outputStream.write(msg.getBytes());
+            this.outputStream.write(("Sys: "+msg).getBytes());
      }
 }

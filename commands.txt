@@ -14,3 +14,4 @@ GroupMsg GroupName "theMsg"
 
 reg userName password
 
+getOnline
